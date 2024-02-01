@@ -1,0 +1,29 @@
+
+{% extends "layout.html" %}
+{% block body %}
+
+{% for user_post in post %}
+<div class="col">
+  <div class="card shadow-sm">
+    <svg class="bd-placeholder-img card-img-top" width="100%" height="3" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <title>Placeholder</title>
+      <img src = "static/{{user_post.image_url}}" alt="My Happy SVG"/>
+      <rect width="100%" height="100%" fill="#55595c"/>
+    </svg>
+    <div class="card-body">
+      <p class="card-text">{{user_post.content}}</p>
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="btn-group">
+          <form action="/CPP">
+          <button type="submit" class="btn btn-sm btn-outline-secondary" >check out</button>
+         </form>
+          
+        </div>
+        <small class="text-body-secondary">{{user_post.post_time}} minitues</small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

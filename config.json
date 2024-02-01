@@ -1,0 +1,7 @@
+{
+    "Param":{
+        "server":"mysql://root:@localhost/blogs",
+        "twitter_url" :"https://twitter.com/",
+        "fb_url" : "https://www.facebook.com/profile.php?id=100068689733265"
+    }
+}
