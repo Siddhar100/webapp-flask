@@ -34,7 +34,9 @@ def index():
 def twitter():
     return render_template('index.html',params=params)
 
-
+@app.route('/signup')
+def signup():
+    return render_template('signUp.html',params=params)
 
 if __name__ == "__main__":
     app.run(debug=True)
