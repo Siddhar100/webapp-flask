@@ -38,5 +38,9 @@ def twitter():
 def signup():
     return render_template('signUp.html',params=params)
 
+@app.route('/formSubmit',methods=['GET','POST'])
+def formSubmit():
+    post = posts.query.filter_by().all()
+    return render_template('index.html',params=params,post=post)
 if __name__ == "__main__":
     app.run(debug=True)
