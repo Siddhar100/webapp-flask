@@ -65,5 +65,11 @@ def formSubmit():
         db.session.commit()
     post = posts.query.filter_by().all()
     return render_template('index.html',params=params,post=post)
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html',params=params)
+
 if __name__ == "__main__":
     app.run(debug=True)
