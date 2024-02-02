@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,session,Response
+from flask_session import Session
 from markupsafe import escape
 import json
 import pymysql
@@ -15,7 +16,9 @@ with open('config.json', 'r') as c:
 app.config['SQLALCHEMY_DATABASE_URI'] = params['server']
 
 db = SQLAlchemy(app)
-
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 class posts(db.Model):
     si_no = db.Column(db.Integer,primary_key=True)
@@ -38,8 +41,12 @@ class user(db.Model):
 
 @app.route('/')
 def index():
-    post = posts.query.filter_by().all()
-    return render_template('index.html',post=post,params=params)
+    if  session.get("name") is not None:
+        # if not there in the session then redirect to the login page
+        return redirect("/dashboard")
+    else:
+        post = posts.query.filter_by().all()
+        return render_template('index.html',post=post,params=params)
 
 @app.route('/twitter')
 def twitter():
@@ -69,6 +76,33 @@ def formSubmit():
 @app.route('/login')
 def login():
     return render_template('login.html',params=params)
+
+@app.route('/dashboard',methods=['GET','POST'])
+def dashboard():
+
+    if request.method == 'POST':
+        email = request.form.get('email_id')
+        password = request.form.get('password')
+        user_password =  user.query.filter_by(email_id=email).first()
+        print(user_password)
+        if password == user_password.password:
+            session["username"] = email
+            return render_template('dashboard.html')
+        else:
+            post = posts.query.filter_by().all()
+            return render_template('loginerror.html',post=post,params=params)
+    else:
+        return "!sorry"
+
+@app.route('/logout',methods = ['POST','GET'])
+def logout():
+    if request.method == 'POST':
+       session["name"] = None
+       post = posts.query.filter_by().all()
+       """response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"""
+       return render_template('index.html',post=post,params=params)
     
+
+
 if __name__ == "__main__":
     app.run(debug=True)
