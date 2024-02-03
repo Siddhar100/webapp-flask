@@ -38,6 +38,13 @@ class user(db.Model):
     user_name = db.Column(db.String(80),nullable=False)
     password = db.Column(db.String(80),nullable=False)
 
+class course(db.Model):
+    si_no = db.Column(db.Integer,primary_key=True)
+    email_id = db.Column(db.String(80),nullable=False)
+    course_name = db.Column(db.String(80),nullable=False)
+    course_time = db.Column(db.String(80),nullable=False)
+    course_id = db.Column(db.Integer,primary_key=False)
+
 
 @app.route('/')
 def index():
@@ -108,6 +115,42 @@ def logout():
 def new_courses():
     post = posts.query.filter_by().all()
     return render_template('courses.html',post=post)
+
+
+@app.route('/1')
+def add_course_1():
+    user_email = session.get('username')
+    course_name = "C"
+    course_time = "2 hrs"
+    course_id = 1
+    entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
+    db.session.add(entry)
+    db.session.commit()
+    return "Sucessfull"
+
+@app.route('/2')
+def add_course_2():
+    user_email = session.get('username')
+    course_name = "Java"
+    course_time = "3 hrs"
+    course_id = 2
+    entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
+    db.session.add(entry)
+    db.session.commit()
+    return "Sucessfull"
+
+@app.route('/3')
+def add_course_3():
+    user_email = session.get('username')
+    course_name = "Python"
+    course_time = "3 hrs"
+    course_id = 3
+    entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
+    db.session.add(entry)
+    db.session.commit()
+    return "Sucessfull"
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
