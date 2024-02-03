@@ -87,7 +87,8 @@ def dashboard():
         print(user_password)
         if password == user_password.password:
             session["username"] = email
-            return render_template('dashboard.html')
+            post = posts.query.filter_by().all()
+            return render_template('dashboard.html',post=post,params=params,user_password=user_password)
         else:
             post = posts.query.filter_by().all()
             return render_template('loginerror.html',post=post,params=params)
@@ -96,7 +97,7 @@ def dashboard():
 
 @app.route('/logout',methods = ['POST','GET'])
 def logout():
-    if request.method == 'POST':
+    if request.method == 'GET':
        session["name"] = None
        post = posts.query.filter_by().all()
        """response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"""
