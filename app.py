@@ -104,6 +104,10 @@ def logout():
        return render_template('index.html',post=post,params=params)
     
 
+@app.route('/new_courses')
+def new_courses():
+    post = posts.query.filter_by().all()
+    return render_template('courses.html',post=post)
 
 if __name__ == "__main__":
     app.run(debug=True)
