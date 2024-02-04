@@ -94,13 +94,23 @@ def dashboard():
         print(user_password)
         if password == user_password.password:
             session["username"] = email
+            session["user_name"] = user_password.user_name
+            session["first_name"]= user_password.first_name
+            session["last_name"] = user_password.last_name
+            session["email"] = user_password.email_id
+            session["country"] = user_password.country
             post = posts.query.filter_by().all()
             return render_template('dashboard.html',post=post,params=params,user_password=user_password)
         else:
             post = posts.query.filter_by().all()
             return render_template('loginerror.html',post=post,params=params)
     else:
-        return "!sorry"
+        email = session.get('email')
+        user_password =  user.query.filter_by(email_id=email).first()
+        post = posts.query.filter_by().all()
+        return render_template('dashboard.html',user_password=user_password,post=post,params=params)
+        
+        
 
 @app.route('/logout',methods = ['POST','GET'])
 def logout():
@@ -115,6 +125,16 @@ def logout():
 def new_courses():
     post = posts.query.filter_by().all()
     return render_template('courses.html',post=post)
+
+@app.route('/bucket')
+def bucket():
+    user_name = session.get("username")
+    courses = course.query.filter_by(email_id=user_name).all()
+    course_ids = []
+    for ids in courses:
+        course_ids.append(ids.course_id)
+    post = posts.query.filter(posts.si_no.in_(course_ids))
+    return render_template('bucket.html',params=params,post=post)
 
 
 @app.route('/1')
