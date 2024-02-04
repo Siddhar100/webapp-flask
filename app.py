@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask,render_template,request,session,Response
+from flask import Flask,render_template,request,session,Response,redirect
 from flask_session import Session
 from markupsafe import escape
 import json
@@ -99,7 +99,11 @@ def dashboard():
             session["last_name"] = user_password.last_name
             session["email"] = user_password.email_id
             session["country"] = user_password.country
-            post = posts.query.filter_by().all()
+            courses = course.query.filter_by(email_id=email).all()
+            not_included = []
+            for items in courses:
+                not_included.append(items.course_id)
+            post = posts.query.filter(~(posts.si_no.in_(not_included)))
             return render_template('dashboard.html',post=post,params=params,user_password=user_password)
         else:
             post = posts.query.filter_by().all()
@@ -107,7 +111,11 @@ def dashboard():
     else:
         email = session.get('email')
         user_password =  user.query.filter_by(email_id=email).first()
-        post = posts.query.filter_by().all()
+        courses = course.query.filter_by(email_id=email).all()
+        not_included = []
+        for items in courses:
+            not_included.append(items.course_id)
+        post = posts.query.filter(~(posts.si_no.in_(not_included)))
         return render_template('dashboard.html',user_password=user_password,post=post,params=params)
         
         
@@ -170,7 +178,17 @@ def add_course_3():
     db.session.commit()
     return "Sucessfull"
 
+@app.route('/course_no_1')
+def course_no_1():
+    return redirect("https://www.cs.fsu.edu/~cop3014p/lectures/")
 
+@app.route('/course_no_2')
+def course_no_2():
+    return redirect("https://ww2.cs.fsu.edu/~thrasher/cop3252/")
+
+@app.route('/course_no_3')
+def course_no_3():
+    return redirect("https://www.tutorialspoint.com/python/index.htm")
 
 if __name__ == "__main__":
     app.run(debug=True)
