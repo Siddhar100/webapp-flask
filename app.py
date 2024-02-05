@@ -3,12 +3,13 @@ from flask import Flask,render_template,request,session,Response,redirect
 from flask_session import Session
 from markupsafe import escape
 import json
+import stripe
 import pymysql
 pymysql.install_as_MySQLdb()
 
 
 app = Flask(__name__,template_folder='templetes')
-
+stripe.api_key =  "sk_test_51OgOmZSIkioDkBuALAyB5xM4dwoE9G51Z2Wj8z1yzLR4Vyjyv5GXLwQRKxDVDm13KrxvAOf7UJOa8oVddHia318l00RtLWqVZJ"
 
 with open('config.json', 'r') as c:
     params = json.load(c)["Param"]
@@ -144,9 +145,8 @@ def bucket():
     post = posts.query.filter(posts.si_no.in_(course_ids))
     return render_template('bucket.html',params=params,post=post)
 
-
-@app.route('/1')
-def add_course_1():
+@app.route('/sucess_1')
+def sucess_1():
     user_email = session.get('username')
     course_name = "C"
     course_time = "2 hrs"
@@ -154,10 +154,17 @@ def add_course_1():
     entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
     db.session.add(entry)
     db.session.commit()
-    return "Sucessfull"
+    email = session.get('email')
+    user_password =  user.query.filter_by(email_id=email).first()
+    courses = course.query.filter_by(email_id=email).all()
+    not_included = []
+    for items in courses:
+        not_included.append(items.course_id)
+    post = posts.query.filter(~(posts.si_no.in_(not_included)))
+    return render_template('dashboard.html',user_password=user_password,post=post,params=params)
 
-@app.route('/2')
-def add_course_2():
+@app.route('/sucess_2')
+def sucess_2():
     user_email = session.get('username')
     course_name = "Java"
     course_time = "3 hrs"
@@ -165,10 +172,18 @@ def add_course_2():
     entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
     db.session.add(entry)
     db.session.commit()
-    return "Sucessfull"
+    email = session.get('email')
+    user_password =  user.query.filter_by(email_id=email).first()
+    courses = course.query.filter_by(email_id=email).all()
+    not_included = []
+    for items in courses:
+        not_included.append(items.course_id)
+    post = posts.query.filter(~(posts.si_no.in_(not_included)))
+    return render_template('dashboard.html',user_password=user_password,post=post,params=params)
 
-@app.route('/3')
-def add_course_3():
+
+@app.route('/sucess_3')
+def sucess_3():
     user_email = session.get('username')
     course_name = "Python"
     course_time = "3 hrs"
@@ -176,7 +191,87 @@ def add_course_3():
     entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
     db.session.add(entry)
     db.session.commit()
-    return "Sucessfull"
+    email = session.get('email')
+    user_password =  user.query.filter_by(email_id=email).first()
+    courses = course.query.filter_by(email_id=email).all()
+    not_included = []
+    for items in courses:
+        not_included.append(items.course_id)
+    post = posts.query.filter(~(posts.si_no.in_(not_included)))
+    return render_template('dashboard.html',user_password=user_password,post=post,params=params)
+
+
+@app.route('/cancel')
+def cancel():
+    email = session.get('email')
+    user_password =  user.query.filter_by(email_id=email).first()
+    courses = course.query.filter_by(email_id=email).all()
+    not_included = []
+    for items in courses:
+        not_included.append(items.course_id)
+    post = posts.query.filter(~(posts.si_no.in_(not_included)))
+    return render_template('dashboard.html',user_password=user_password,post=post,params=params)
+
+@app.route('/1')
+def add_course_1():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items = [
+                {
+                    'price':'price_1OgTw2SIkioDkBuA4JCmpoI1',
+                    'quantity':1
+
+                }
+            ],
+            mode="subscription",
+            success_url = "http://127.0.0.1:5000/sucess_1",
+            cancel_url = "http://127.0.0.1:5000/cancel"
+
+        )
+    except Exception as e:
+        return str(e)
+    return redirect(checkout_session.url)  
+    
+
+@app.route('/2')
+def add_course_2():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items = [
+                {
+                    'price':'price_1OgVbcSIkioDkBuARv71Co95',
+                    'quantity':1
+
+                }
+            ],
+            mode="subscription",
+            success_url = "http://127.0.0.1:5000/sucess_2",
+            cancel_url = "http://127.0.0.1:5000/cancel"
+
+        )
+    except Exception as e:
+        return str(e)
+    return redirect(checkout_session.url)  
+
+@app.route('/3')
+def add_course_3():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items = [
+                {
+                    'price':'price_1OgVd0SIkioDkBuAKfURdk0O',
+                    'quantity':1
+
+                }
+            ],
+            mode="subscription",
+            success_url = "http://127.0.0.1:5000/sucess_3",
+            cancel_url = "http://127.0.0.1:5000/cancel"
+
+        )
+    except Exception as e:
+        return str(e)
+    return redirect(checkout_session.url)  
 
 @app.route('/course_no_1')
 def course_no_1():
