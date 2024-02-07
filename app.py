@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,session,Response,redirect
+from flask_session import Session
 from markupsafe import escape
 import json
 import pymysql
@@ -15,7 +16,9 @@ with open('config.json', 'r') as c:
 app.config['SQLALCHEMY_DATABASE_URI'] = params['server']
 
 db = SQLAlchemy(app)
-
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 class posts(db.Model):
     si_no = db.Column(db.Integer,primary_key=True)
@@ -35,11 +38,22 @@ class user(db.Model):
     user_name = db.Column(db.String(80),nullable=False)
     password = db.Column(db.String(80),nullable=False)
 
+class course(db.Model):
+    si_no = db.Column(db.Integer,primary_key=True)
+    email_id = db.Column(db.String(80),nullable=False)
+    course_name = db.Column(db.String(80),nullable=False)
+    course_time = db.Column(db.String(80),nullable=False)
+    course_id = db.Column(db.Integer,primary_key=False)
+
 
 @app.route('/')
 def index():
-    post = posts.query.filter_by().all()
-    return render_template('index.html',post=post,params=params)
+    if  session.get("name") is not None:
+        # if not there in the session then redirect to the login page
+        return redirect("/dashboard")
+    else:
+        post = posts.query.filter_by().all()
+        return render_template('index.html',post=post,params=params)
 
 @app.route('/twitter')
 def twitter():
@@ -66,10 +80,115 @@ def formSubmit():
     post = posts.query.filter_by().all()
     return render_template('index.html',params=params,post=post)
 
-
 @app.route('/login')
 def login():
     return render_template('login.html',params=params)
+
+@app.route('/dashboard',methods=['GET','POST'])
+def dashboard():
+
+    if request.method == 'POST':
+        email = request.form.get('email_id')
+        password = request.form.get('password')
+        user_password =  user.query.filter_by(email_id=email).first()
+        print(user_password)
+        if password == user_password.password:
+            session["username"] = email
+            session["user_name"] = user_password.user_name
+            session["first_name"]= user_password.first_name
+            session["last_name"] = user_password.last_name
+            session["email"] = user_password.email_id
+            session["country"] = user_password.country
+            courses = course.query.filter_by(email_id=email).all()
+            not_included = []
+            for items in courses:
+                not_included.append(items.course_id)
+            post = posts.query.filter(~(posts.si_no.in_(not_included)))
+            return render_template('dashboard.html',post=post,params=params,user_password=user_password)
+        else:
+            post = posts.query.filter_by().all()
+            return render_template('loginerror.html',post=post,params=params)
+    else:
+        email = session.get('email')
+        user_password =  user.query.filter_by(email_id=email).first()
+        courses = course.query.filter_by(email_id=email).all()
+        not_included = []
+        for items in courses:
+            not_included.append(items.course_id)
+        post = posts.query.filter(~(posts.si_no.in_(not_included)))
+        return render_template('dashboard.html',user_password=user_password,post=post,params=params)
+        
+        
+
+@app.route('/logout',methods = ['POST','GET'])
+def logout():
+    if request.method == 'GET':
+       session["name"] = None
+       post = posts.query.filter_by().all()
+       """response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"""
+       return render_template('index.html',post=post,params=params)
+    
+
+@app.route('/new_courses')
+def new_courses():
+    post = posts.query.filter_by().all()
+    return render_template('courses.html',post=post)
+
+@app.route('/bucket')
+def bucket():
+    user_name = session.get("username")
+    courses = course.query.filter_by(email_id=user_name).all()
+    course_ids = []
+    for ids in courses:
+        course_ids.append(ids.course_id)
+    post = posts.query.filter(posts.si_no.in_(course_ids))
+    return render_template('bucket.html',params=params,post=post)
+
+
+@app.route('/1')
+def add_course_1():
+    user_email = session.get('username')
+    course_name = "C"
+    course_time = "2 hrs"
+    course_id = 1
+    entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
+    db.session.add(entry)
+    db.session.commit()
+    return "Sucessfull"
+
+@app.route('/2')
+def add_course_2():
+    user_email = session.get('username')
+    course_name = "Java"
+    course_time = "3 hrs"
+    course_id = 2
+    entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
+    db.session.add(entry)
+    db.session.commit()
+    return "Sucessfull"
+
+@app.route('/3')
+def add_course_3():
+    user_email = session.get('username')
+    course_name = "Python"
+    course_time = "3 hrs"
+    course_id = 3
+    entry = course(email_id=user_email,course_name=course_name,course_time=course_time,course_id=course_id)
+    db.session.add(entry)
+    db.session.commit()
+    return "Sucessfull"
+
+@app.route('/course_no_1')
+def course_no_1():
+    return redirect("https://www.cs.fsu.edu/~cop3014p/lectures/")
+
+@app.route('/course_no_2')
+def course_no_2():
+    return redirect("https://ww2.cs.fsu.edu/~thrasher/cop3252/")
+
+@app.route('/course_no_3')
+def course_no_3():
+    return redirect("https://www.tutorialspoint.com/python/index.htm")
 
 if __name__ == "__main__":
     app.run(debug=True)
