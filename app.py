@@ -58,6 +58,7 @@ def index():
 
 @app.route('/twitter')
 def twitter():
+    #we can directly redirect to the particular url
     return render_template('index.html',params=params)
 
 @app.route('/signup')
@@ -66,6 +67,8 @@ def signup():
 
 @app.route('/formSubmit',methods=['GET','POST'])
 def formSubmit():
+    #user sign up function.
+    #all the data is stored in mysql database.
     if request.method == 'POST':
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
@@ -83,12 +86,14 @@ def formSubmit():
 
 @app.route('/login')
 def login():
+    #user login page
     return render_template('login.html',params=params)
 
 @app.route('/dashboard',methods=['GET','POST'])
 def dashboard():
 
     if request.method == 'POST':
+        #data submission in login page will always use post method for security
         email = request.form.get('email_id')
         password = request.form.get('password')
         user_password =  user.query.filter_by(email_id=email).first()
@@ -110,6 +115,7 @@ def dashboard():
             post = posts.query.filter_by().all()
             return render_template('loginerror.html',post=post,params=params)
     else:
+        #Get method will be used to redirect from bucket to dashboard
         email = session.get('email')
         user_password =  user.query.filter_by(email_id=email).first()
         courses = course.query.filter_by(email_id=email).all()
@@ -123,6 +129,7 @@ def dashboard():
 
 @app.route('/logout',methods = ['POST','GET'])
 def logout():
+    #In logout method session will be invalidate
     if request.method == 'GET':
        session["name"] = None
        post = posts.query.filter_by().all()
