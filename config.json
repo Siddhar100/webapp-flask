@@ -1,6 +1,6 @@
 {
     "Param":{
-        "server":"",
+        "server":"mysql://sql6682401:uMIk6wq8e4@sql6.freesqldatabase.com:3306/sql6682401",
         "twitter_url" :"https://twitter.com/",
         "fb_url" : "https://www.facebook.com/profile.php?id=100068689733265",
         "email" : "siddhartha14chakraborty@gmail.com"

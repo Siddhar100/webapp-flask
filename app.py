@@ -78,11 +78,35 @@ def formSubmit():
         zip_code = request.form.get('zip_code')
         user_name = request.form.get('user_name')
         password = request.form.get('password')
-        entry = user(first_name=first_name, last_name=last_name , email_id=email_id,country=country , state=state,zip_code=zip_code,user_name=user_name,password=password)
-        db.session.add(entry)
-        db.session.commit()
-    post = posts.query.filter_by().all()
-    return render_template('index.html',params=params,post=post)
+        errors = []
+        if not first_name:
+            errors.append("Enter First Name!")
+        if not last_name:
+            errors.append("Enter Last Name!")
+        if not email_id:
+            errors.append("Enter Email!")
+        if not country:
+            errors.append("Enter Country!")
+        if not state:
+            errors.append("Enter State!")
+        if not zip_code:
+            errors.append("Enter Zip Code!")
+        if not user_name:
+            errors.append("Enter User Name!")
+        if not password:
+            errors.append("Enter password!")
+        if len(password) < 8:
+            errors.append("Password should be minimum 8 charecter!")
+        if user.query.filter_by(email_id=email_id).count()!= 0:
+            errors.append("You have already registered!")
+        if errors:
+            return render_template('signUp.html',errors=errors,params=params)
+        else:
+            entry = user(first_name=first_name, last_name=last_name , email_id=email_id,country=country , state=state,zip_code=zip_code,user_name=user_name,password=password)
+            db.session.add(entry)
+            db.session.commit()
+            post = posts.query.filter_by().all()
+            return render_template('index.html',params=params,post=post)
 
 @app.route('/login')
 def login():
@@ -96,24 +120,35 @@ def dashboard():
         #data submission in login page will always use post method for security
         email = request.form.get('email_id')
         password = request.form.get('password')
-        user_password =  user.query.filter_by(email_id=email).first()
-        print(user_password)
-        if password == user_password.password:
-            session["username"] = email
-            session["user_name"] = user_password.user_name
-            session["first_name"]= user_password.first_name
-            session["last_name"] = user_password.last_name
-            session["email"] = user_password.email_id
-            session["country"] = user_password.country
-            courses = course.query.filter_by(email_id=email).all()
-            not_included = []
-            for items in courses:
-                not_included.append(items.course_id)
-            post = posts.query.filter(~(posts.si_no.in_(not_included)))
-            return render_template('dashboard.html',post=post,params=params,user_password=user_password)
+        errors = []
+        if not email:
+            errors.append("Enter Email Id!")
+        if not password:
+            errors.append("Enter password!")
+        if user.query.filter_by(email_id=email).count() == 0:
+            errors.append("Invalid User Name and Password!")
+        if errors:
+            return render_template('login.html',errors=errors,params=params)
         else:
-            post = posts.query.filter_by().all()
-            return render_template('loginerror.html',post=post,params=params)
+            user_password =  user.query.filter_by(email_id=email).first()
+            #print(user_password)
+            if password == user_password.password:
+                session["username"] = email
+                session["user_name"] = user_password.user_name
+                session["first_name"]= user_password.first_name
+                session["last_name"] = user_password.last_name
+                session["email"] = user_password.email_id
+                session["country"] = user_password.country
+                courses = course.query.filter_by(email_id=email).all()
+                not_included = []
+                for items in courses:
+                    not_included.append(items.course_id)
+                post = posts.query.filter(~(posts.si_no.in_(not_included)))
+                return render_template('dashboard.html',post=post,params=params,user_password=user_password,errors=errors)
+            else:
+                errors.append("password mismatched!")
+                return render_template('login.html',errors=errors,params=params)
+            
     else:
         #Get method will be used to redirect from bucket to dashboard
         email = session.get('email')
