@@ -98,7 +98,7 @@ def formSubmit():
         if len(password) < 8:
             errors.append("Password should be minimum 8 charecter!")
         if user.query.filter_by(email_id=email_id).count()!= 0:
-            errors.append("You have already registered!")
+            errors.append("Email Id is already registered with another user!")
         if errors:
             return render_template('signUp.html',errors=errors,params=params)
         else:
@@ -146,7 +146,7 @@ def dashboard():
                 post = posts.query.filter(~(posts.si_no.in_(not_included)))
                 return render_template('dashboard.html',post=post,params=params,user_password=user_password,errors=errors)
             else:
-                errors.append("password mismatched!")
+                errors.append("Password mismatch!")
                 return render_template('login.html',errors=errors,params=params)
             
     else:
